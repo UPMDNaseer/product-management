@@ -1,7 +1,8 @@
 package com.naseer.productmanagement.controller;
 
-import com.naseer.productmanagement.entity.Product;
+import com.naseer.productmanagement.dto.ProductDto;
 import com.naseer.productmanagement.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +17,14 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @PostMapping("/create")
+    public ProductDto createOne(@Valid @RequestBody ProductDto productDto) {
+        return productService.saveProduct(productDto);
+    }
+
+
     @PostMapping("/bulk")
-    public List<Product> createBulk(@RequestBody List<Product> products) {
+    public List<ProductDto> createBulk(@Valid @RequestBody List<ProductDto> products) {
         return products.stream()
                 .map(productService::saveProduct)
                 .collect(Collectors.toList());
@@ -25,8 +32,8 @@ public class ProductController {
 
 
     @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @RequestBody Product product) {
-        return productService.updateProduct(id, product);
+    public ProductDto update(@Valid @PathVariable Long id, @RequestBody ProductDto productDto) {
+        return productService.updateProduct(id, productDto);
     }
 
 
@@ -36,12 +43,12 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product getById(@PathVariable Long id){
+    public ProductDto getById(@PathVariable Long id){
         return productService.getProductById(id);
     }
 
     @GetMapping
-    public Page<Product> getall(@RequestParam(defaultValue = "0") int page,
+    public Page<ProductDto> getall(@RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "5") int size,
                                 @RequestParam(defaultValue = "name") String sortBy){
         return productService.getAllProducts(page, size, sortBy);

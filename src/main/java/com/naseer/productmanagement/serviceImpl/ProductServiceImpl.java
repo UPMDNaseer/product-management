@@ -1,8 +1,10 @@
 package com.naseer.productmanagement.serviceImpl;
 
+import com.naseer.productmanagement.dto.ProductDto;
 import com.naseer.productmanagement.entity.Product;
 import com.naseer.productmanagement.repository.ProductRepository;
 import com.naseer.productmanagement.service.ProductService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,22 +18,29 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepo;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
-    public Product saveProduct(Product product) {
-        return productRepo.save(product);
+    public ProductDto saveProduct(ProductDto productDto) {
+        Product product = modelMapper.map(productDto, Product.class);
+        Product savedProduct = productRepo.save(product);
+        return modelMapper.map(savedProduct, ProductDto.class);
     }
 
     @Override
-    public Product updateProduct(Long id, Product product) {
+    public ProductDto updateProduct(Long id, ProductDto productDto) {
         Product existing = productRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        existing.setName(product.getName());
-        existing.setCategory(product.getCategory());
-        existing.setPrice(product.getPrice());
-        existing.setQuantity(product.getQuantity());
+        existing.setName(productDto.getName());
+        existing.setCategory(productDto.getCategory());
+        existing.setPrice(productDto.getPrice());
+        existing.setQuantity(productDto.getQuantity());
 
-        return productRepo.save(existing);
+        productRepo.save(existing);
+
+        return modelMapper.map(existing, ProductDto.class);
     }
 
 
@@ -42,13 +51,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProductById(Long id) {
-        return productRepo.findById(id).orElse(null);
+    public ProductDto getProductById(Long id) {
+        Product product = productRepo.findById(id).orElse(null);
+        ProductDto savedProduct = modelMapper.map(product, ProductDto.class);
+        return savedProduct;
     }
 
     @Override
-    public Page<Product> getAllProducts(int page, int size, String sortBy) {
+    public Page<ProductDto> getAllProducts(int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return productRepo.findAll(pageable);
+        Page<Product> all = productRepo.findAll(pageable);
+        Page<ProductDto> dtoPage = all.map(product -> modelMapper.map(product, ProductDto.class));
+        return dtoPage;
     }
 }
