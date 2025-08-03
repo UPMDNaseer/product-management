@@ -42,8 +42,8 @@ public class ProductController {
 
     @GetMapping
     public Page<Product> getall(@RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "0") int size,
-                                @RequestParam(defaultValue = "0") String sortBy){
+                                @RequestParam(defaultValue = "5") int size,
+                                @RequestParam(defaultValue = "name") String sortBy){
         return productService.getAllProducts(page, size, sortBy);
     }
 
